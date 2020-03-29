@@ -114,6 +114,15 @@ def _generate_adv_file(attack_method,num_classes,epsilon,set_size):
             model, num_classes=num_classes, loss_fn=nn.CrossEntropyLoss(reduction="sum"),
             initial_const=0.05, max_iterations=500, search_steps=1, confidence=0, clip_min=0.0, clip_max=1.0,
             targeted=False, abort_early=True)
+    elif attack_method == "CW":
+        adversary = CarliniWagnerL2Attack(
+            model, num_classes=num_classes, loss_fn=nn.CrossEntropyLoss(reduction="sum"),
+            max_iterations=1000, confidence=0, clip_min=0.0, clip_max=1.0,
+            targeted=False, abort_early=True)
+    elif attack_method == "JSMA":
+        adversary = JacobianSaliencyMapAttack(
+            model, num_classes=num_classes, loss_fn=nn.CrossEntropyLoss(reduction="sum"),
+            clip_min=0.0, clip_max=1.0,theta=epsilon)
 
     # load data
     # data_dir = "/data/dataset/ILSVRC2012"
@@ -162,7 +171,7 @@ if __name__ == '__main__':
     parser.add_argument('--seed', default=0, type=int)
     # attack
     parser.add_argument("--attack_method", default="PGD", type=str,
-                        choices=['FGSM', 'PGD','Momentum','STA'])
+                        choices=['FGSM', 'PGD','Momentum','STA','JSMA','CW'])
 
     parser.add_argument('--epsilon', type = float,default=8/255, help='if pd_block is used')
     parser.add_argument('--num_classes', default=1000, type=int)
