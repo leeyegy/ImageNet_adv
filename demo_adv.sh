@@ -1,4 +1,4 @@
-for epsilon in 0.00784 0.03137 0.06275
+for epsilon in 0.0
 do 
-python data_generator.py --attack_method JSMA --epsilon $epsilon
+python data_generator.py --attack_method CW --epsilon $epsilon
 done 

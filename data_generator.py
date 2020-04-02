@@ -25,16 +25,16 @@ class ImageNetDataset(Dataset):
     def __len__(self):
         return self.data.size(0)
 
-def _generate_random_small_test_set(set_size=500):
+def _generate_random_small_test_set(set_size=500,resize=64):
     # load data
     data_dir = "/data/dataset/ILSVRC2012"
-    data_transforms = transforms.Compose([transforms.RandomSizedCrop(224), transforms.ToTensor()])
+    data_transforms = transforms.Compose([transforms.RandomSizedCrop(resize), transforms.ToTensor()])
     print("Initializing Datasets and DataLoaders...")
     test_datasets = datasets.ImageFolder(os.path.join(data_dir, "val"), data_transforms)
     test_loader = torch.utils.data.DataLoader(test_datasets, batch_size=50, shuffle=True, num_workers=4)
 
     torch.manual_seed(0)
-    data = np.zeros([set_size,3,224,224])
+    data = np.zeros([set_size,3,resize,resize])
     true_target = np.zeros([set_size])
 
     # perturb
@@ -47,7 +47,7 @@ def _generate_random_small_test_set(set_size=500):
 
     print("test_true_target.shape:{}".format(true_target.shape))
 
-    h5_store = h5py.File("data/test_ImageNet50000_" + str(set_size) + ".h5", 'w')
+    h5_store = h5py.File("data/test_ImageNet_" + str(set_size) +"_"+str(resize)+ ".h5", 'w')
     h5_store.create_dataset('data', data=data)
     h5_store.create_dataset('true_target', data=true_target)
     h5_store.close()
@@ -56,7 +56,7 @@ def _generate_random_small_test_set(set_size=500):
 
 def get_test_adv_loader(attack_method,epsilon,batch_size,shuffle):
     #save file
-    if os.path.exists("data/test_ImageNet50000_adv_"+str(attack_method)+"_"+str(epsilon)+".h5"):
+    if os.path.exists("data/test_ImageNet_adv_"+str(attack_method)+"_"+str(epsilon)+".h5"):
         h5_store = h5py.File("data/test_adv_"+str(attack_method)+"_"+str(epsilon)+".h5", 'r')
         test_data = h5_store['data'][:] # 通过切片得到np数组
         test_true_target=h5_store['true_target'][:]
@@ -132,7 +132,7 @@ def _generate_adv_file(attack_method,num_classes,epsilon,set_size):
     # test_loader = torch.utils.data.DataLoader(test_datasets, batch_size=50, shuffle=False, num_workers=4)
 
     # version two
-    h5_store = h5py.File("data/test_ImageNet50000_" + str(set_size) + ".h5","r")
+    h5_store = h5py.File("data/test_ImageNet_" + str(set_size) + ".h5","r")
     data = h5_store['data'][:]
     target = h5_store['true_target'][:]
     data = torch.from_numpy(data)

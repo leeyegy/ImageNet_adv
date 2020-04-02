@@ -12,7 +12,7 @@ save_dir = 'checkpoint/'
 model_name = "resnet"
 num_classes = 1000
 batch_size = 50
-num_epochs = 8
+num_epochs = 20
 
 # load pretrained model
 model = models.resnet50(pretrained=True)
@@ -24,12 +24,12 @@ print (model)
 # test_loader = get_imagenet_loader(batch_size=50, num_workers=4, h5_path="data/test_imagenet_50000.h5",shuffle=False)
 
 # data_transforms = transforms.Compose([transforms.RandomSizedCrop(224),transforms.RandomHorizontalFlip(),transforms.ToTensor()])
-data_transforms = transforms.Compose([transforms.RandomSizedCrop(224),transforms.ToTensor()])
+data_transforms = transforms.Compose([transforms.RandomSizedCrop(64),transforms.ToTensor()])
 print("Initializing Datasets and DataLoaders...")
 image_datasets = {x:datasets.ImageFolder(os.path.join(data_dir,x),data_transforms) for x in ['train','val']}
 dataloaders_dict = {x: torch.utils.data.DataLoader(image_datasets[x],batch_size=batch_size,shuffle=True,num_workers=4) for x in ['train','val']}
 
-samples = {"train":50000,'val':50000}
+samples = {"train":100000,'val':50000}
 
 # load device
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -39,12 +39,12 @@ model = model.to(device)
 optimizer = optim.SGD(model.parameters(),lr=0.001,momentum=0.9)
 criterion = nn.CrossEntropyLoss()
 
-init_epoch = 7
-model = torch.load("checkpoint/resnet50_epoch_7.pth")
-model = model.to(device)
+# init_epoch = 7
+# model = torch.load("checkpoint/resnet50_epoch_7.pth")
+# model = model.to(device)
 
 
-for epoch in range(init_epoch,num_epochs):
+for epoch in range(num_epochs):
     print ('Epoch {}/{}'.format(epoch,num_epochs-1))
     print ('-' * 10)
 
@@ -85,6 +85,6 @@ for epoch in range(init_epoch,num_epochs):
         # hash = hash.max(1,keepdim=True)[1]
         # print(hash)
 
-    # torch.save(model,os.path.join('checkpoint',"resnet50_epoch_"+str(epoch)+".pth"))
+    torch.save(model,os.path.join('checkpoint',"64_resnet50_epoch_"+str(epoch)+".pth"))
 
 
